@@ -2,3 +2,4 @@ agno>=2.2.10
 langchain-openai
 browser-use
 streamlit
+pyopengl  # required for 3D rendering on some systems
