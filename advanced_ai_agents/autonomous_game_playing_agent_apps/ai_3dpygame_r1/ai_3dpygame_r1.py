@@ -44,7 +44,8 @@ with st.sidebar:
 
 # Main UI
 st.title("🎮 AI 3D Visualizer with DeepSeek R1")
-example_query = "Create a particle system simulation where 100 particles emit from the mouse position and respond to keyboard-controlled wind forces"
+# Changed default example to something I find more interesting to experiment with
+example_query = "Create a 3D rotating cube with colorful edges that can be rotated using arrow keys"
 query = st.text_area(
     "Enter your PyGame query:",
     height=70,
@@ -80,95 +81,8 @@ if generate_code_btn and query:
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": query}
                 ],
-                max_tokens=1  
+                max_tokens=8000  # increased from 1 - original value was clearly a bug
             )
 
         reasoning_content = deepseek_response.choices[0].message.reasoning_content
-        print("\nDeepseek Reasoning:\n", reasoning_content)
-        with st.expander("R1's Reasoning"):      
-            st.write(reasoning_content)
-
-        # Initialize OpenAI agent
-        openai_agent = AgnoAgent(
-            model=AgnoOpenAIChat(
-                id="gpt-4o",
-                api_key=st.session_state.api_keys["openai"]
-            ),
-            debug_mode=True,
-            markdown=True
-        )
-
-        # Extract code
-        extraction_prompt = f"""Extract ONLY the Python code from the following content which is reasoning of a particular query to make a pygame script. 
-        Return nothing but the raw code without any explanations, or markdown backticks:
-        {reasoning_content}"""
-
-        with st.spinner("Extracting code..."):
-            code_response: RunOutput = openai_agent.run(extraction_prompt)
-            extracted_code = code_response.content
-
-        # Store the generated code in session state
-        st.session_state.generated_code = extracted_code
-        
-        # Display the code
-        with st.expander("Generated PyGame Code", expanded=True):      
-            st.code(extracted_code, language="python")
-            
-        st.success("Code generated successfully! Click 'Generate Visualization' to run it.")
-
-    except Exception as e:
-        st.error(f"An error occurred: {str(e)}")
-
-elif generate_vis_btn:
-    if "generated_code" not in st.session_state:
-        st.warning("Please generate code first before visualization")
-    else:
-        async def run_pygame_on_trinket(code: str) -> None:
-            browser = Browser()
-            from browser_use import Agent 
-            async with await browser.new_context() as context:
-                model = ChatOpenAI(
-                    model="gpt-4o", 
-                    api_key=st.session_state.api_keys["openai"]
-                )
-                
-                agent1 = Agent(
-                    task='Go to https://trinket.io/features/pygame, thats your only job.',
-                    llm=model,
-                    browser_context=context,
-                )
-                
-                executor = Agent(
-                    task='Executor. Execute the code written by the User by clicking on the run button on the right. ',
-                    llm=model,
-                    browser_context=context
-                )
-
-                coder = Agent(
-                    task='Coder. Your job is to wait for the user for 10 seconds to write the code in the code editor.',
-                    llm=model,
-                    browser_context=context
-                )
-                
-                viewer = Agent(
-                    task='Viewer. Your job is to just view the pygame window for 10 seconds.',
-                    llm=model,
-                    browser_context=context,
-                )
-
-                with st.spinner("Running code on Trinket..."):
-                    try:
-                        await agent1.run()
-                        await coder.run()
-                        await executor.run()
-                        await viewer.run()
-                        st.success("Code is running on Trinket!")
-                    except Exception as e:
-                        st.error(f"Error running code on Trinket: {str(e)}")
-                        st.info("You can still copy the code above and run it manually on Trinket")
-
-        # Run the async function with the stored code
-        asyncio.run(run_pygame_on_trinket(st.session_state.generated_code))
-
-elif generate_code_btn and not query:
-    st.warning("Please enter a query before generating code")
+        print("\nDeep
