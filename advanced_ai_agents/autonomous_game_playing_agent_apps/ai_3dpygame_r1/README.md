@@ -52,3 +52,7 @@ streamlit run ai_3dpygame_r1.py
      - Execution
      - Visualization viewing
 4. **User Interface:** Streamlit provides an intuitive interface for entering queries, viewing code, and managing the visualization process.
+
+### Personal Notes
+
+> **Note:** I found that Trinket.io can be slow to load at times, causing the browser automation to time out. If you run into this, try increasing the timeout values in the browser agent configuration. Also, make sure your OpenAI API key has access to GPT-4o — GPT-4o-mini won't work as reliably for clean code extraction.
